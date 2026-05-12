@@ -1,0 +1,9 @@
+streamlit>=1.31.0
+pandas
+openpyxl
+altair<5.0.0
+streamlit
+gspread
+google-auth
+pyarrow
+fpdf
