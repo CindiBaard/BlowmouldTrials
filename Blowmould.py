@@ -342,7 +342,7 @@ if search_input:
             mass = c2.text_input("Mass", value=str(ld.get('Mass', '')))
 
             obs = st.text_area("Observations")
-                }
+            }
 
                 # Save Local Parquet
                 df_new = pd.DataFrame([full_row]).astype(str)
