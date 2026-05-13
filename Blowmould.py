@@ -130,10 +130,11 @@ def sync_last_trial_to_cloud(pre_prod_no):
 # --- SIDEBAR ---
 with st.sidebar:
     st.title("Quick Links")
-    # Fixed the missing quotation marks around the labels
-        st.page_link("https://projecttracker-kc2ksaezfqxarnv96ugzdk.streamlit.app/", label="📋 Go to Project Tracker", icon="🚀"
+    # Fixed indentation and added missing closing parenthesis below
+    st.page_link("https://projecttracker-kc2ksaezfqxarnv96ugzdk.streamlit.app/", label="📋 Go to Project Tracker", icon="🚀")
     st.page_link("https://injectiontrial-996rcfrtn9rkgafzsejzrn.streamlit.app/", label="Injection Trial App", icon="🧪")
     st.divider()
+    
     if st.button("🔄 Rebuild Local DB", use_container_width=True):
         st.cache_data.clear()
         if os.path.exists(FILENAME_PARQUET): 
