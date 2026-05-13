@@ -41,14 +41,29 @@ def get_gspread_client():
 # --- 2. DATA HELPERS ---
 def get_project_data(pre_prod_no):
     if not os.path.exists(FILENAME_PARQUET):
+        st.error(f"File not found: {FILENAME_PARQUET}")
         return None
     try:
         df = pd.read_parquet(FILENAME_PARQUET)
+        
+        # 1. Clean input: make it a string, strip spaces, remove decimals if they exist
         search_id = str(pre_prod_no).strip().split('.')[0]
-        df['Pre-Prod No.'] = df['Pre-Prod No.'].astype(str).str.replace(r'\.0$', '', regex=True).str.strip()
+        
+        # 2. Clean the Column: ensure the search column is strings and stripped
+        # We use 'errors="coerce"' to handle any weird data types in that column
+        df['Pre-Prod No.'] = df['Pre-Prod No.'].astype(str).str.split('.').str[0].str.strip()
+        
+        # 3. Perform the search
         result = df[df['Pre-Prod No.'] == search_id]
-        return result.iloc[0].to_dict() if not result.empty else None
-    except:
+        
+        if not result.empty:
+            return result.iloc[0].to_dict()
+        else:
+            # Let's see what's actually there if it fails
+            st.warning(f"ID {search_id} not found in column. Sample values: {df['Pre-Prod No.'].head(3).tolist()}")
+            return None
+    except Exception as e:
+        st.error(f"Error reading Parquet: {e}")
         return None
 
 def get_next_trial_reference(pre_prod_no):
@@ -134,7 +149,7 @@ with st.sidebar:
     st.page_link("https://projecttracker-kc2ksaezfqxarnv96ugzdk.streamlit.app/", label="📋 Go to Project Tracker", icon="🚀")
     st.page_link("https://injectiontrial-996rcfrtn9rkgafzsejzrn.streamlit.app/", label="Injection Trial App", icon="🧪")
     st.divider()
-    
+
     if st.button("🔄 Rebuild Local DB", use_container_width=True):
         st.cache_data.clear()
         if os.path.exists(FILENAME_PARQUET): 
