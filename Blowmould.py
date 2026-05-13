@@ -217,7 +217,7 @@ if search_input:
 
         # --- THE FORM ---
         with st.form("trial_entry_form", clear_on_submit=True):
-            st.subheader(f"Current Phase: {current_trial_ref}")
+            st.subheader(f"Trial Reference: {current_trial_ref}")
             
             # MOVED TO TOP: Client and Job Description
             top_c1, top_c2 = st.columns([1, 2])
