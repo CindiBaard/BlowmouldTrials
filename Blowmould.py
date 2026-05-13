@@ -279,12 +279,12 @@ if search_input:
         with st.form("trial_entry_form", clear_on_submit=True):
             st.subheader(f"Trial Reference: {current_trial_ref}")
             
-            # MOVED TO TOP: Client and Job Description
+            # --- MOVED TO TOP ---
             top_c1, top_c2 = st.columns([1, 2])
             client = top_c1.text_input("Client", value=ld.get('Client', ''))
             desc = top_c2.text_input("Job Description", value=ld.get('Project Description', ''))
             
-            st.divider()
+            st.divider() # Visual break before technical details
 
             # Row 1: Basic Admin
             c1, c2, c3 = st.columns(3)
@@ -342,44 +342,6 @@ if search_input:
             mass = c2.text_input("Mass", value=str(ld.get('Mass', '')))
 
             obs = st.text_area("Observations")
-
-            # --- SUBMISSION LOGIC ---
-            if st.form_submit_button("Submit Trial Entry"):
-                # Data mapping
-                full_row = {
-                    "Trial Reference": current_trial_ref,
-                    "Pre-Prod No.": search_input,
-                    "Date": t_date.strftime("%Y-%m-%d"),
-                    "Sales Rep": s_rep,
-                    "Target to": target,
-                    "Client": client,
-                    "Trial Qty": qty,
-                    "Operator": operator,
-                    "Prod Machine": m_prod,
-                    "Trial Machine": m_trial,
-                    "Description": desc,
-                    "Height": product_height,
-                    "Grade of Material": grade_of_material,
-                    "Supplier": supp,
-                    "Diameter": product_diam,
-                    "Mix %": mix,
-                    "Lid Info": lid_info,
-                    "Item Colour": item_colour,
-                    "Pigment_MB Grade": pigment_grade,
-                    "Tinuvin": tinuvin,
-                    "Drawing No.": drawing_number,
-                    "Mould No": m_no,
-                    "Cavities": cavs,
-                    "Machine No": machine_no,
-                    "Screw Diameter (IML only)": screw_diam,
-                    "Colour Set": c_set,
-                    "Colour Act": c_act,
-                    "Colour %": c_per,
-                    "Shot Weight": s_weight,
-                    "Dosing Time": d_time,
-                    "Cycle": cycle,
-                    "Mass": mass,
-                    "Observations": obs
                 }
 
                 # Save Local Parquet
