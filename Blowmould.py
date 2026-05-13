@@ -79,7 +79,7 @@ def create_pdf(data):
     
     # Title
     pdf.set_font("Arial", "B", 14)
-    pdf.cell(190, 10, txt=f"Trial Report: {data.get('Trial Reference', 'N/A')}", ln=True, align='C')
+    pdf.cell(190, 10, txt=f"Blowmould Trial Request: {data.get('Trial Reference', 'N/A')}", ln=True, align='C')
     pdf.ln(5)
     
     # Layout settings
