@@ -219,12 +219,18 @@ if search_input:
         with st.form("trial_entry_form", clear_on_submit=True):
             st.subheader(f"Current Phase: {current_trial_ref}")
             
+            # MOVED TO TOP: Client and Job Description
+            top_c1, top_c2 = st.columns([1, 2])
+            client = top_c1.text_input("Client", value=ld.get('Client', ''))
+            desc = top_c2.text_input("Job Description", value=ld.get('Project Description', ''))
+            
+            st.divider()
+
             # Row 1: Basic Admin
-            c1, c2, c3, c4 = st.columns(4)
+            c1, c2, c3 = st.columns(3)
             t_date = c1.date_input("Trial Date", datetime.now())
             s_rep = c2.text_input("Sales Rep", value=ld.get('Sales Rep', ''))
-            client = c3.text_input("Client", value=ld.get('Client', ''))
-            operator = c4.text_input("Operator Name")
+            operator = c3.text_input("Operator Name")
 
             # Row 2: Machine/Targets
             c1, c2, c3, c4 = st.columns(4)
@@ -235,11 +241,10 @@ if search_input:
 
             # Row 3: Product Details
             st.markdown("### Product Specifications")
-            c1, c2, c3, c4 = st.columns(4)
-            desc = c1.text_input("Description", value=ld.get('Project Description', ''))
-            p_code = c2.text_input("Product Code", value=ld.get('Product Code', ''))
-            mat = c3.text_input("Material", value=ld.get('Material', ''))
-            supp = c4.text_input("Supplier", value=ld.get('Supplier', ''))
+            c1, c2, c3 = st.columns(3)
+            p_code = c1.text_input("Product Code", value=ld.get('Product Code', ''))
+            mat = c2.text_input("Material", value=ld.get('Material', ''))
+            supp = c3.text_input("Supplier", value=ld.get('Supplier', ''))
 
             c1, c2, c3, c4 = st.columns(4)
             product_height = c1.text_input("Height", value=str(ld.get('Height', '')))
