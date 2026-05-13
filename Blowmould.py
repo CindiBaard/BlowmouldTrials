@@ -76,15 +76,55 @@ def get_next_trial_reference(pre_prod_no):
 def create_pdf(data):
     pdf = FPDF()
     pdf.add_page()
+    
+    # Title
     pdf.set_font("Arial", "B", 14)
-    pdf.cell(200, 10, txt=f"Trial Report: {data.get('Trial Reference', 'N/A')}", ln=True, align='C')
+    pdf.cell(190, 10, txt=f"Trial Report: {data.get('Trial Reference', 'N/A')}", ln=True, align='C')
     pdf.ln(5)
-    pdf.set_font("Arial", size=9)
+    
+    # Layout settings
+    col_width = 90
+    line_height = 6  # Reduced from 7 to save space
+    pdf.set_font("Arial", size=8) # Smaller font for more data
+    
+    # Starting coordinates
+    start_y = pdf.get_y()
+    x_offset = 10
+    
+    # Counter to manage columns
+    count = 0
+    items_per_col = (len(data) // 2) + 1 # Split list in half
+
     for key, value in data.items():
+        # Shift to second column after half the items
+        if count == items_per_col:
+            pdf.set_y(start_y)
+            x_offset = 105 # Move to the right side of the page
+            
+        pdf.set_x(x_offset)
+        
+        # Key (Bold)
+        pdf.set_font("Arial", "B", 8)
+        pdf.cell(40, line_height, txt=f"{key}:", border=0)
+        
+        # Value (Regular)
+        pdf.set_font("Arial", size=8)
+        # Use a short version of strings to prevent overlap
+        display_val = str(value)[:45] if value else "N/A"
+        pdf.cell(col_width - 40, line_height, txt=display_val, border=0, ln=True)
+        
+        count += 1
+
+    # Observations Section (Spans full width at bottom)
+    if data.get("Observations"):
+        pdf.ln(5)
+        pdf.set_x(10)
         pdf.set_font("Arial", "B", 9)
-        pdf.cell(55, 7, txt=f"{key}:", border=0)
-        pdf.set_font("Arial", size=9)
-        pdf.cell(0, 7, txt=f"{str(value)}", border=0, ln=True)
+        pdf.cell(0, 7, "Observations:", ln=True)
+        pdf.set_font("Arial", size=8)
+        # Multi_cell handles text wrapping for long notes
+        pdf.multi_cell(190, 5, txt=str(data["Observations"]))
+
     return pdf.output(dest='S').encode('latin-1')
 
 def update_tracker_status(pre_prod_no, current_trial_ref, manual_date=None):
