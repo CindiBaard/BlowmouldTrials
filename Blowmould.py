@@ -305,41 +305,76 @@ if search_input:
             mass = c2.text_input("Mass", value=str(ld.get('Mass', '')))
             obs = st.text_area("Observations")
 
-            if st.form_submit_button("Submit Trial Data"):
+if st.form_submit_button("Submit Trial Data"):
+                # 1. Prepare data (ensure all values are converted to string for Google Sheets)
                 full_row = {
-                    "Trial Reference": current_trial_ref,
-                    "Pre-Prod No.": search_input,
-                    "Client": client, "Description": desc,
+                    "Trial Reference": str(current_trial_ref),
+                    "Pre-Prod No.": str(search_input),
+                    "Client": str(client), 
+                    "Description": str(desc),
                     "Date": t_date.strftime("%Y-%m-%d"),
-                    "Sales Rep": s_rep, "Operator": operator,
-                    "Target": target, "Qty": qty,
-                    "Prod Machine": m_prod, "Trial Machine": m_trial,
-                    "Product Code": p_code, "Material": mat, "Supplier": supp,
-                    "Height": product_height, "Grade": grade_of_material,
-                    "Diameter": product_diam, "Mix %": mix,
-                    "Lid": lid_info, "Colour": item_colour, "Pigment": pigment_grade,
-                    "Tinuvin": tinuvin, "Drawing": drawing_number, "Mould No": m_no,
-                    "Machine No": machine_no, "Cavities": cavs, "Screw Diam": screw_diam,
-                    "Colour Set": c_set, "Colour Act": c_act, "Colour %": c_per,
-                    "Shot Weight": s_weight, "Dosing Time": d_time, "Cycle": cycle, "Mass": mass,
-                    "Observations": obs
+                    "Sales Rep": str(s_rep), 
+                    "Operator": str(operator),
+                    "Target": str(target), 
+                    "Qty": str(qty),
+                    "Prod Machine": str(m_prod), 
+                    "Trial Machine": str(m_trial),
+                    "Product Code": str(p_code), 
+                    "Material": str(mat), 
+                    "Supplier": str(supp),
+                    "Height": str(product_height), 
+                    "Grade": str(grade_of_material),
+                    "Diameter": str(product_diam), 
+                    "Mix %": str(mix),
+                    "Lid": str(lid_info), 
+                    "Colour": str(item_colour), 
+                    "Pigment": str(pigment_grade),
+                    "Tinuvin": str(tinuvin), 
+                    "Drawing": str(drawing_number), 
+                    "Mould No": str(m_no),
+                    "Machine No": str(machine_no), 
+                    "Cavities": str(cavs), 
+                    "Screw Diam": str(screw_diam),
+                    "Colour Set": str(c_set), 
+                    "Colour Act": str(c_act), 
+                    "Colour %": str(c_per),
+                    "Shot Weight": str(s_weight), 
+                    "Dosing Time": str(d_time), 
+                    "Cycle": str(cycle), 
+                    "Mass": str(mass),
+                    "Observations": str(obs)
                 }
 
-                df_new = pd.DataFrame([full_row]).astype(str)
+                # 2. Save Locally First (Parquet)
+                df_new = pd.DataFrame([full_row])
                 if os.path.exists(SUBMISSIONS_FILE):
                     df_hist = pd.read_parquet(SUBMISSIONS_FILE)
                     pd.concat([df_hist, df_new], ignore_index=True).to_parquet(SUBMISSIONS_FILE, index=False)
                 else:
                     df_new.to_parquet(SUBMISSIONS_FILE, index=False)
 
+                # 3. Save to Cloud
                 try:
-                    client_gs = get_gspread_client()
-                    update_tracker_status(search_input, current_trial_ref)
-                    t_sheet = client_gs.open_by_key(TRIAL_TIMELINE_ID).get_worksheet(0)
-                    t_sheet.append_row(list(full_row.values()))
+                    with st.spinner("Uploading to Google Sheets..."):
+                        client_gs = get_gspread_client()
+                        
+                        # Update Task 1: Master Project Tracker (Success/Date)
+                        update_tracker_status(search_input, current_trial_ref)
+                        
+                        # Update Task 2: Blowmould Timeline Spreadsheet
+                        # We verify the sheet exists before appending
+                        ts_spreadsheet = client_gs.open_by_key(TRIAL_TIMELINE_ID)
+                        t_sheet = ts_spreadsheet.get_worksheet(0) # Grabs the first tab
+                        
+                        # Convert dict values to a flat list for append_row
+                        row_to_append = list(full_row.values())
+                        t_sheet.append_row(row_to_append)
                     
+                    # 4. Success State & Rerun
                     st.session_state.last_submission = full_row
                     st.session_state.submitted = True
                     st.rerun()
+                    
                 except Exception as e:
-                    st.error(f"Cloud Sync failed: {e}")
+                    st.error(f"Cloud Sync failed: {str(e)}")
+                    # We don't rerun here so the user can see the error
