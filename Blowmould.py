@@ -40,7 +40,7 @@ def get_gspread_client():
 # --- 2. DATA HELPERS ---
 @st.cache_data
 def load_and_clean_parquet():
-    """Loads the main database and cleans the Pre-Prod No. column for easy searching."""
+    """Loads the main database and cleans the Pre-Prod No. column."""
     if not os.path.exists(FILENAME_PARQUET):
         return None
     try:
@@ -55,7 +55,8 @@ def load_and_clean_parquet():
 def get_project_data(pre_prod_no):
     df = load_and_clean_parquet()
     if df is None:
-        st.error(f"File not found: {FILENAME_PARQUET}")
+        # If Rebuild deleted the file, this warning triggers correctly
+        st.warning(f"Database file not found at {FILENAME_PARQUET}. Please ensure it is present in your repository.")
         return None
     
     search_id = str(pre_prod_no).strip().split('.')[0]
@@ -64,7 +65,7 @@ def get_project_data(pre_prod_no):
     if not result.empty:
         return result.iloc[0].to_dict()
     else:
-        st.warning(f"ID {search_id} not found. Ensure the Parquet file is uploaded to GitHub.")
+        st.warning(f"ID {search_id} not found in the database.")
         return None
 
 def get_next_trial_reference(pre_prod_no):
@@ -186,10 +187,14 @@ with st.sidebar:
     st.page_link("https://injectiontrial-996rcfrtn9rkgafzsejzrn.streamlit.app/", label="Injection Trial App", icon="🧪")
     st.divider()
 
+    # REBUILD LOGIC: Clears cache so load_and_clean_parquet runs fresh
     if st.button("🔄 Rebuild Local DB", use_container_width=True):
         st.cache_data.clear()
-        if os.path.exists(FILENAME_PARQUET): 
-            os.remove(FILENAME_PARQUET)
+        # Note: If the file is tracked by Git, os.remove might not be necessary 
+        # unless you are generating the file dynamically. 
+        # For a GitHub-hosted file, st.cache_data.clear() is usually enough.
+        st.success("Cache Rebuilt!")
+        time.sleep(1)
         st.rerun()
     
     st.header("Admin Controls")
