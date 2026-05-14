@@ -40,21 +40,17 @@ def get_gspread_client():
 
 # --- 2. DATA HELPERS ---
 def get_project_data(pre_prod_no):
-    if not os.path.exists(FILENAME_PARQUET):
+    df = get_cleaned_data()
+    if df is None:
         st.error(f"File not found: {FILENAME_PARQUET}")
         return None
-    try:
-        df = pd.read_parquet(FILENAME_PARQUET)
-        
-        # 1. Clean input: make it a string, strip spaces, remove decimals if they exist
-        search_id = str(pre_prod_no).strip().split('.')[0]
-        
-        # 2. Clean the Column: ensure the search column is strings and stripped
-        # We use 'errors="coerce"' to handle any weird data types in that column
-        df['Pre-Prod No.'] = df['Pre-Prod No.'].astype(str).str.split('.').str[0].str.strip()
-        
-        # 3. Perform the search
-        result = df[df['Pre-Prod No.'] == search_id]
+    
+    search_id = str(pre_prod_no).strip().split('.')[0]
+    result = df[df['Pre-Prod No.'] == search_id]
+    
+    if not result.empty:
+        return result.iloc[0].to_dict()
+    return None
         
         if not result.empty:
             return result.iloc[0].to_dict()
@@ -142,7 +138,7 @@ def create_pdf(data):
         pdf.set_font("Arial", size=8)
         pdf.multi_cell(190, 5, txt=str(obs_text))
 
-    return pdf.output(dest='S').encode('latin-1')
+    return pdf.output(dest='S').encode('latin-1', errors='replace')
 
 def update_tracker_status(pre_prod_no, current_trial_ref, manual_date=None):
     """Helper to update the Master Project Tracker sheet"""
