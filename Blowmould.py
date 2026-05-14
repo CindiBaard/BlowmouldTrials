@@ -305,7 +305,7 @@ if search_input:
             mass = c2.text_input("Mass", value=str(ld.get('Mass', '')))
             obs = st.text_area("Observations")
 
-if st.form_submit_button("Submit Trial Data"):
+            if st.form_submit_button("Submit Trial Data"):
                 # 1. Prepare data (ensure all values are converted to string for Google Sheets)
                 full_row = {
                     "Trial Reference": str(current_trial_ref),
